@@ -1,4 +1,3 @@
-from queue import Full
 from NeuralNetworkLib.Network import Network
 from NeuralNetworkLib.ActivationFunctions.ReLU import ReLU
 from NeuralNetworkLib.DataLoader import DataLoader
