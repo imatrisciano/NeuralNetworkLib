@@ -1,9 +1,9 @@
 from abc import abstractmethod
 
 
-class IFunction:
+class IErrorFunction:
     
     @abstractmethod
-    def calculate(x):
+    def calculate(expected, real):
         """Calcola il valore della funzione nel punto specificato"""
         pass

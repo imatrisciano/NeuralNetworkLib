@@ -5,14 +5,15 @@ from NeuralNetworkLib.DataLoader import DataLoader
 from NeuralNetworkLib.Layers.BaseLayer import BaseLayer
 from NeuralNetworkLib.StoppingCriteria.IStoppingCriterion import IStoppingCriterion
 from NeuralNetworkLib.StoppingCriteria.NeverStopCriterion import NeverStopCriterion
+from NeuralNetworkLib.ErrorFunctions.IErrorFunction import IErrorFunction
 
 class Network:
 
-    def __init__(self, data_loader: DataLoader, MAX_EPOCH=1000, stop_criterion: IStoppingCriterion = NeverStopCriterion) -> None:
+    def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, MAX_EPOCH=1000, stop_criterion: IStoppingCriterion = NeverStopCriterion) -> None:
         self.data_loader = data_loader
         self.stop_criterion = stop_criterion
         self.MAX_EPOCH = MAX_EPOCH
-
+        self.error_function = error_function
 
         self.train_X, self.train_Y, self.validation_X, self.validation_Y, self.test_X, self.test_Y = data_loader.LoadDataset()
 
@@ -67,12 +68,30 @@ class Network:
         pass
 
     def compute_training_error(self):
-        """Returns the loss using the specified error function"""
+        """Returns the training error using the specified error function"""
 
-        pass
+        E = 0.0
+        for n in range(0, len(self.train_X)):
+            x = self.train_X[n]
+            y = self.train_Y[n]
+            t = self.forward(x)
+
+            E += self.error_function.calculate(expected=y, real=t)
+
+        return E
 
     def compute_validation_error(self):
-        pass
+        """Returns the validation error using the specified error function"""
+
+        E = 0.0
+        for n in range(0, len(self.validation_X)):
+            x = self.validation_X[n]
+            y = self.validation_Y[n]
+            t = self.forward(x)
+
+            E += self.error_function.calculate(expected=y, real=t)
+
+        return E
 
     def compute_test_accuracy(self):
         """Returns the accuracy on test set"""
