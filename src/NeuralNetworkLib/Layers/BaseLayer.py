@@ -8,7 +8,6 @@ class BaseLayer:
         self.activation_function = activation_function
         self.input_size = input_size
         self.number_of_nodes = number_of_nodes
-        self.W = []
 
         self.__initialize_weight()
     

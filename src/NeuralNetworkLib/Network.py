@@ -37,7 +37,7 @@ class Network:
 
             if self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history):
                 print("Stopping criterion met.")
-                return
+                break
 
             self.reset_error_derivative()
 
@@ -67,16 +67,20 @@ class Network:
     def backward(self):
         pass
 
+    def get_class(self, x):
+        y = self.forward(x)
+        return np.argmax(y)
+
     def compute_training_error(self):
         """Returns the training error using the specified error function"""
 
         E = 0.0
         for n in range(0, len(self.train_X)):
             x = self.train_X[n]
-            y = self.train_Y[n]
-            t = self.forward(x)
+            t = self.train_Y[n]
+            y = self.forward(x)
 
-            E += self.error_function.calculate(expected=y, real=t)
+            E += self.error_function.calculate(expected=t, real=y)
 
         return E
 
@@ -86,13 +90,24 @@ class Network:
         E = 0.0
         for n in range(0, len(self.validation_X)):
             x = self.validation_X[n]
-            y = self.validation_Y[n]
-            t = self.forward(x)
+            t = self.validation_Y[n]
+            y = self.forward(x)
 
-            E += self.error_function.calculate(expected=y, real=t)
+            E += self.error_function.calculate(expected=t, real=y)
 
         return E
 
     def compute_test_accuracy(self):
         """Returns the accuracy on test set"""
-        pass
+
+        correct_answers = 0
+
+        for n in range (0, len(self.test_X)):
+            x = self.test_X[n]
+            t = self.test_Y[n]
+            y_class = self.get_class(x)
+
+            if (y_class == np.argmax(t)):
+                correct_answers += 1
+
+        return correct_answers / len(self.test_X)
