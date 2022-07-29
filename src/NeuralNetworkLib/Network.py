@@ -30,6 +30,7 @@ class Network:
         """Batch training process"""
 
         train_start_time = datetime.now()
+        old_training_loss = 0.0
 
         for epoch in range(0, self.MAX_EPOCH):
             
@@ -42,10 +43,14 @@ class Network:
             self.reset_error_derivative()
 
             for n in range(0, len(self.train_X)):
-                self.forward()
-                self.backward()
+                x = self.train_X[n]
+                y = self.forward(x)
+                training_loss = self.compute_training_error()
+
+                self.backward(y, training_loss, old_training_loss)
                 self.update_error_derivative()
             
+            old_training_loss = training_loss
             self.update_weights()
 
             training_error = self.compute_training_error()
@@ -61,8 +66,11 @@ class Network:
         train_duration = datetime.now() - train_start_time
         print(f"Training completed in {train_duration}")
 
-    def forward(self):
-        pass
+    def forward(self, x):
+        for layer in self.Layers:
+            x = layer.forward(x)
+        return x
+        
 
     def backward(self):
         pass
