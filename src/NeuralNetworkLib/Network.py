@@ -16,7 +16,12 @@ class Network:
         self.error_function = error_function
         self.learning_rate = learning_rate
 
-        self.train_X, self.train_Y, self.validation_X, self.validation_Y, self.test_X, self.test_Y = data_loader.LoadDataset()
+        self.train_X = data_loader.train_X
+        self.train_Y = data_loader.train_Y
+        self.validation_X = data_loader.validation_X
+        self.validation_Y = data_loader.validation_Y
+        self.test_X = data_loader.test_X
+        self.test_Y = data_loader.test_Y
 
         self.training_error_history = []
         self.validation_error_history = []
