@@ -9,11 +9,12 @@ from NeuralNetworkLib.ErrorFunctions.IErrorFunction import IErrorFunction
 
 class Network:
 
-    def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, MAX_EPOCH=1000, stop_criterion: IStoppingCriterion = NeverStopCriterion) -> None:
+    def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, MAX_EPOCH=1000, stop_criterion: IStoppingCriterion = NeverStopCriterion, learning_rate = 0.1) -> None:
         self.data_loader = data_loader
         self.stop_criterion = stop_criterion
         self.MAX_EPOCH = MAX_EPOCH
         self.error_function = error_function
+        self.learning_rate = learning_rate
 
         self.train_X, self.train_Y, self.validation_X, self.validation_Y, self.test_X, self.test_Y = data_loader.LoadDataset()
 
@@ -47,8 +48,8 @@ class Network:
                 y = self.forward(x)
                 training_loss = self.compute_training_error()
 
-                self.backward(y, training_loss, old_training_loss)
-                self.update_error_derivative()
+                t = self.train_Y[n]
+                self.backward(y, t)
             
             old_training_loss = training_loss
             self.update_weights()
@@ -72,8 +73,24 @@ class Network:
         return x
         
 
-    def backward(self):
-        pass
+    def backward(self, y, t):
+        #calculate delta for the output layer
+        output_layer = self.Layers[-1]
+        output_layer.delta = output_layer.activation_function.derivative(output_layer.input) * (y - t)
+
+        #iterate from second-last to the first layer
+        for i in reversed(range(0, len(self.Layers) - 1)):
+            layer = self.Layers[i]
+            next_layer = self.Layers[i+1]
+            layer.delta = layer.activation_function.derivative(layer.input) * np.dot(next_layer.W, next_layer.delta)
+        
+    def update_weights(self):
+        for i in range (1, len(self.Layers)):
+            layer = self.Layers[i]
+            prev_layer = self.Layers[i-1]
+            for j in range(0, len(layer.W)):
+                layer.W[j] -= self.learning_rate * layer.delta * prev_layer.output
+
 
     def get_class(self, x):
         y = self.forward(x)
