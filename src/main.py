@@ -2,13 +2,14 @@ from NeuralNetworkLib.Network import Network
 from NeuralNetworkLib.ActivationFunctions.ReLU import ReLU
 from NeuralNetworkLib.DataLoader import DataLoader
 from NeuralNetworkLib.Layers.FullyConnectedLayer import FullyConnectedLayer
+from NeuralNetworkLib.ErrorFunctions.CrossEntropy import CrossEntropy
+import os
 
-
-
-data_loader = DataLoader("../dataset/mnist", training_set_percentage=0.75) #loads mnist, splitting it into 75% training and 25% validation
+dataset_path = os.path.normpath(os.path.join(os.getcwd(), "../dataset/mnist/"))
+data_loader = DataLoader(dataset_path, training_set_percentage=0.75) #loads mnist, splitting it into 75% training and 25% validation
 data_loader.LoadDataset()
 
-net = Network(data_loader)
+net = Network(data_loader, CrossEntropy)
 
 number_of_layers = 3
 number_of_nodes = 100

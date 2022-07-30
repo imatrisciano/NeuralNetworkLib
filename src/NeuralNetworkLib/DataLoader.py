@@ -1,5 +1,4 @@
 from mnist import MNIST #pip install python-mnist
-
 class DataLoader:
 
     def __init__(self, dataset_path, training_set_percentage = 0.75):
@@ -12,10 +11,9 @@ class DataLoader:
         Validation set size: dataset_size * (1-training_set_percentage)"""
 
         mndata = MNIST(self.dataset_path)
-
         set_X, set_Y = mndata.load_training()
 
-        training_set_size = len(set_X) * self.training_set_percentage
+        training_set_size = int (len(set_X) * self.training_set_percentage)
         validation_set_size = len(set_X) - training_set_size
 
         self.train_X = set_X[0: training_set_size]
