@@ -8,13 +8,15 @@ class BaseLayer:
         self.activation_function = activation_function
         self.input_size = input_size
         self.number_of_nodes = number_of_nodes
-
+        
         self.__initialize_weight()
     
 
-    def __initialize_weight(self, random_min=-0.1, random_max=0.1) -> None:
-        W_size = (self.input_size + 1, self.number_of_nodes) #input_size + 1 per aggiungere il bias
+    def __initialize_weight(self, random_min=-0.01, random_max=0.01) -> None:
+        W_size = (self.input_size, self.number_of_nodes)
         self.W = np.random.uniform(random_min, random_max, W_size)
+        
+        self.delta = np.zeros(self.number_of_nodes)
 
     @abstractmethod
     def forward(self, X: np.array) -> np.array:

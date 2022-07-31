@@ -4,7 +4,7 @@ from NeuralNetworkLib.ErrorFunctions.IErrorFunction import IErrorFunction
 
 class CrossEntropy(IErrorFunction):
     def calculate(expected, actual):
-        return np.sum(expected * np.log(actual))
+        return - np.sum(expected * np.log(actual))
 
     def calculate_derivative(expected, actual):
-        return 
+        return expected / (np.ones(len(actual)) - actual)

@@ -1,9 +1,12 @@
 from mnist import MNIST #pip install python-mnist
+import numpy as np
+
 class DataLoader:
 
-    def __init__(self, dataset_path, training_set_percentage = 0.75):
+    def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75):
         self.dataset_path = dataset_path
         self.training_set_percentage = training_set_percentage
+        self.dataset_percentage = dataset_percentage
 
     def LoadDataset(self):
         """ Loads the dataset and splits it into training and validation. Also loads the test set.
@@ -13,13 +16,39 @@ class DataLoader:
         mndata = MNIST(self.dataset_path)
         set_X, set_Y = mndata.load_training()
 
-        training_set_size = int (len(set_X) * self.training_set_percentage)
-        validation_set_size = len(set_X) - training_set_size
+        training_set_size = int (len(set_X) * self.training_set_percentage * self.dataset_percentage)
+        validation_set_size = int (len(set_X)*self.dataset_percentage - training_set_size)
 
-        self.train_X = set_X[0: training_set_size]
-        self.train_Y = set_Y[0: training_set_size]
+        train_X = set_X[0: training_set_size]
+        train_Y = set_Y[0: training_set_size]
 
-        self.validation_X = set_X[training_set_size : validation_set_size]
-        self.validation_Y = set_Y[training_set_size : validation_set_size]
+        validation_X = set_X[training_set_size: training_set_size + validation_set_size]
+        validation_Y = set_Y[training_set_size: training_set_size + validation_set_size]
         
-        self.test_X, self.test_Y = mndata.load_testing()
+        test_X, test_Y = mndata.load_testing()
+
+        self.train_X = np.array(train_X)
+        self.labels = np.unique(train_Y)
+
+        self.train_Y = self.labels_to_one_hot(train_Y)
+
+        print(f"Training set loaded: {len(self.train_X)} elements")
+
+        self.validation_X = np.array(validation_X)
+        self.validation_Y = self.labels_to_one_hot(validation_Y)
+
+        print(f"Validation set loaded: {len(self.validation_X)} elements")
+
+        self.test_X = np.array(test_X)
+        self.test_Y = self.labels_to_one_hot(test_Y)
+
+        print(f"Test set loaded: {len(self.test_X)} elements")
+
+    def labels_to_one_hot(self, Y) -> np.array:
+        one_hot = np.empty( (len(Y), len(self.labels)) )
+        for i in range(0, len(Y)):
+            one_hot[i] = np.eye(len(self.labels))[Y[i]]
+        return one_hot
+    
+    def label_to_one_hot(self, label):
+        return np.eye(len(self.labels))[label]
