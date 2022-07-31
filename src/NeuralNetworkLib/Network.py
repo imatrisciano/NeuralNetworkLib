@@ -92,14 +92,14 @@ class Network:
         for i in reversed(range(0, len(self.Layers) - 1)):
             layer = self.Layers[i]
             next_layer = self.Layers[i+1]
-            layer.delta = layer.activation_function.derivative(layer.output) * np.dot(next_layer.W, next_layer.delta)
+            layer.delta = layer.activation_function.derivative(layer.output) * (next_layer.W * next_layer.delta)
         
     def update_weights(self):
         for i in range (1, len(self.Layers)):
             layer = self.Layers[i]
             prev_layer = self.Layers[i-1]
-            for j in range(0, len(layer.W)):
-                layer.W[j] -= self.learning_rate * layer.delta * prev_layer.output
+            #for j in range(0, len(layer.W)):
+            layer.W -= self.learning_rate * layer.delta * prev_layer.output
 
 
     def get_class(self, x):
