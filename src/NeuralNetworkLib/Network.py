@@ -25,6 +25,7 @@ class Network:
         self.training_error_history = []
         self.validation_error_history = []
 
+        self.batch_size = len(self.train_X)
         self.Layers = []
 
 
@@ -47,9 +48,7 @@ class Network:
 
             self.reset_error_derivative()
 
-            max_y = np.zeros(len(self.train_Y[0]))
-
-            for n in range(0, len(self.train_X)):
+            for n in range(0, self.batch_size):
                 x = self.train_X[n]
                 y = self.forward(x)
                 
@@ -69,14 +68,16 @@ class Network:
             epoch_duration = time.time() - epoch_start_time
 
             print(f"Epoch #{epoch}: training error: {training_error}, validation error: {validation_error}. Took {1000.0 * epoch_duration} ms")
-        
+          #  print(f"Output layer delta: {self.Layers[-1].delta}")
+          #  print(f"penultimo layer delta: {self.Layers[-2].delta}")
+
         train_duration = datetime.now() - train_start_time
         print(f"Training completed in {train_duration}")
 
     def forward(self, x):
-        x = np.append(x, 1) # bias
         for layer in self.Layers:
             x = layer.forward(x)
+
         return x
     
     def reset_error_derivative(self):
@@ -86,20 +87,47 @@ class Network:
     def backward(self, y, t):
         #calculate delta for the output layer
         output_layer = self.Layers[-1]
-        output_layer.delta = output_layer.activation_function.derivative(output_layer.output) * (y - t)
 
-        #iterate from second-last to the first layer
-        for i in reversed(range(0, len(self.Layers) - 1)):
+        output_layer.delta += output_layer.activation_function.derivative(output_layer.unactivated_output) * self.error_function.calculate_derivative(expected=t, actual=y) 
+
+        for i in range(len(self.Layers) - 2, 0, -1):
             layer = self.Layers[i]
             next_layer = self.Layers[i+1]
-            layer.delta = layer.activation_function.derivative(layer.output) * (next_layer.W * next_layer.delta)
+            ##layer.delta += layer.activation_function.derivative(layer.unactivated_output) * np.dot(next_layer.delta.reshape(1,-1), next_layer.W)
+            #layer.delta = layer.activation_function.derivative(layer.output) * (next_layer.W * next_layer.delta)
+           
+            g_prime_in_a = layer.activation_function.derivative(layer.unactivated_output)
+            for h in range (0, layer.number_of_nodes):
+                sum = 0.0
+                for k in range(0, next_layer.number_of_nodes):
+                    w = next_layer.W[k, h]
+                    delta_k = next_layer.delta[k]
+                    sum += w*delta_k
+                layer.delta[h] += g_prime_in_a[h] * sum 
+            
+            #layer.delta += layer.activation_function.derivative(layer.W @ prev_layer.output) * np.dot(next_layer.delta, next_layer.W)
         
     def update_weights(self):
-        for i in range (1, len(self.Layers)):
-            layer = self.Layers[i]
-            prev_layer = self.Layers[i-1]
+        for l in range (0, len(self.Layers)):
+            layer = self.Layers[l]
             #for j in range(0, len(layer.W)):
-            layer.W -= self.learning_rate * layer.delta * prev_layer.output
+            """
+            for n in range(0, layer.number_of_nodes):
+                delta_neurone = layer.delta[n]
+                input_neurone = layer.input[n] #??
+                #https://brilliant.org/wiki/backpropagation/ 
+                #TODO
+            """
+            for j in range(0, len(layer.W)):
+                for i in range (0, len(layer.W[0])):
+                    dW = layer.delta[j] * layer.input[i]
+                    layer.W[j][i] -= self.learning_rate / self.batch_size * dW
+
+            """
+            delta_T = np.reshape(layer.delta, (len(layer.delta), 1))
+            dW = (delta_T @ np.reshape(layer.input, (1, len(layer.input)))) / self.batch_size
+            layer.W -= self.learning_rate * dW
+            """
 
 
     def get_class(self, x):
@@ -117,7 +145,7 @@ class Network:
 
             E += self.error_function.calculate(expected=t, actual=y)
 
-        return E
+        return E / len(self.train_X)
 
     def compute_validation_error(self):
         """Returns the validation error using the specified error function"""
@@ -130,7 +158,7 @@ class Network:
 
             E += self.error_function.calculate(expected=t, actual=y)
 
-        return E
+        return E/ len(self.validation_X)
 
     def compute_test_accuracy(self):
         """Returns the accuracy on test set"""

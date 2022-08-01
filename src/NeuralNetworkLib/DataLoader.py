@@ -13,6 +13,7 @@ class DataLoader:
         Training set size: dataset_size * training_set_percentage
         Validation set size: dataset_size * (1-training_set_percentage)"""
 
+        print("Loading dataset...")
         mndata = MNIST(self.dataset_path)
         set_X, set_Y = mndata.load_training()
 

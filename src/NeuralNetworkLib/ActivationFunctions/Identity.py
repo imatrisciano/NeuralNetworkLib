@@ -6,4 +6,4 @@ class Identity(IFunction):
         return x
 
     def derivative(x):
-        return np.ones(len(x))
+        return np.ones_like(x)

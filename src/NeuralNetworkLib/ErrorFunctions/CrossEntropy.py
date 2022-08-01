@@ -7,4 +7,4 @@ class CrossEntropy(IErrorFunction):
         return - np.sum(expected * np.log(actual))
 
     def calculate_derivative(expected, actual):
-        return expected / (np.ones(len(actual)) - actual)
+        return - np.sum(expected / actual)

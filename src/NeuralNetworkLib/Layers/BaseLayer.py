@@ -13,7 +13,7 @@ class BaseLayer:
     
 
     def __initialize_weight(self, random_min=-0.01, random_max=0.01) -> None:
-        W_size = (self.input_size, self.number_of_nodes)
+        W_size = (self.number_of_nodes, self.input_size + 1)
         self.W = np.random.uniform(random_min, random_max, W_size)
         
         self.delta = np.zeros(self.number_of_nodes)
