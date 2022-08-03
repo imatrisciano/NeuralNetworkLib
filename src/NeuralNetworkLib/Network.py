@@ -26,15 +26,19 @@ class Network:
         self.training_error_history = []
         self.validation_error_history = []
 
-        self.batch_size = len(self.train_X)
         self.Layers = []
 
 
     def add_layer(self, layer: BaseLayer):
         self.Layers.append(layer)
     
-    def train(self, MAX_EPOCH=100):
+    def train(self, batch_size, MAX_EPOCH=100):
         """Batch training process"""
+        self.batch_size = batch_size
+        
+        if len(self.train_X) % self.batch_size != 0:
+            print("Invalid batch size, should be a divisor of len(self.train_X)")
+            return
 
         train_start_time = datetime.now()
 
@@ -45,18 +49,20 @@ class Network:
                 print("Stopping criterion met.")
                 break
 
-            
-            self.reset_error_derivative()
-            for n in range(0, self.batch_size):
-                
-                x = self.train_X[n]
-                y = self.forward(x)
-                
-                t = self.train_Y[n]
-                self.backward(y, t)
-                self.update_derivative(x)
-                
-            self.update_weights()
+            n = 0
+            while n < len(self.train_X):
+                self.reset_error_derivative()
+                for b in range(0, self.batch_size):
+                    
+                    x = self.train_X[n]
+                    y = self.forward(x)
+                    
+                    t = self.train_Y[n]
+                    self.backward(y, t)
+                    self.update_derivative(x)
+                    n += 1
+                    
+                self.update_weights()
 
             
 

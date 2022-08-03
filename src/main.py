@@ -89,12 +89,12 @@ for i in range(0, number_of_hidden_layers - 1):
 output_layer = FullyConnectedLayer(20, number_of_output_nodes, activation_function=Sigmoid)
 net.add_layer(output_layer)
 
-net.train(MAX_EPOCH=5)
+net.train(batch_size=1, MAX_EPOCH=5)
 
 test_accuracy = net.compute_test_accuracy()
 print(f"Test accuracy: {test_accuracy}")
 
-print(net.get_class(data_loader.train_X[10]))
+print("Secondo me è un ", net.get_class(data_loader.train_X[10]))
 image = np.reshape(data_loader.train_X[10], (28,28)) # 28 = sqrt(sample size)
 fig = plt.figure
 plt.imshow(image, cmap='gray')
