@@ -28,27 +28,28 @@ class DataLoader:
         
         test_X, test_Y = mndata.load_testing()
 
-        self.train_X = np.array(train_X)
+        self.train_X = np.array(train_X) / 255
         self.labels = np.unique(train_Y)
 
         self.train_Y = self.labels_to_one_hot(train_Y)
 
         print(f"Training set loaded: {len(self.train_X)} elements")
 
-        self.validation_X = np.array(validation_X)
+        self.validation_X = np.array(validation_X) / 255
         self.validation_Y = self.labels_to_one_hot(validation_Y)
 
         print(f"Validation set loaded: {len(self.validation_X)} elements")
 
-        self.test_X = np.array(test_X)
+        self.test_X = np.array(test_X) / 255
         self.test_Y = self.labels_to_one_hot(test_Y)
 
         print(f"Test set loaded: {len(self.test_X)} elements")
 
     def labels_to_one_hot(self, Y) -> np.array:
-        one_hot = np.empty( (len(Y), len(self.labels)) )
+        one_hot = np.empty( (len(Y), len(self.labels), 1) )
         for i in range(0, len(Y)):
-            one_hot[i] = np.eye(len(self.labels))[Y[i]]
+            a = (np.eye(len(self.labels))[Y[i]])
+            one_hot[i] = a.reshape(len(a), 1)
         return one_hot
     
     def label_to_one_hot(self, label):
