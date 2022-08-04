@@ -12,7 +12,6 @@ from NeuralNetworkLib.ActivationFunctions.Identity import Identity
 from NeuralNetworkLib.DataLoader import DataLoader
 from NeuralNetworkLib.Layers.FullyConnectedLayer import FullyConnectedLayer
 from NeuralNetworkLib.ErrorFunctions.CrossEntropy import CrossEntropy
-from DummyLoader import DummyLoader
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,13 +27,16 @@ learning 0.15, input->20->output, batch 10, training 450   : test 0.schifo
 learning 0.15, input->40->20->output, batch 1, training 450   : test 0.5
 
 learning 0.15, input->20->output, batch 1, training 450,  5 epoch, pesi in [-0.1, 0.1]   : test 0.5
-
+learning 0.15, input->20->output, batch 1, training 0.5,  10 epoch, pesi in [-0.1, 0.1]   : test 0.9153 #forse il batch era a 10
+learning 0.15, input->20->output, batch 1, training 0.3,  10 epoch, pesi in [-0.1, 0.1]   : test 0.9217
+learning 0.05, input->20->output, batch 1, training 0.3,  10 epoch, pesi in [-0.1, 0.1]   : test 0.9203
+learning 0.25, input->20->output, batch 1, training 0.3,  10 epoch, pesi in [-0.1, 0.1]   : test 0.9131
 """
 
 
 
 dataset_path = os.path.normpath(os.path.join(os.getcwd(), "../dataset/mnist/"))
-data_loader = DataLoader(dataset_path, dataset_percentage=0.01, training_set_percentage=0.75, test_set_size=1000) #loads mnist, splitting it into 75% training and 25% validation
+data_loader = DataLoader(dataset_path, dataset_percentage=0.1, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
 data_loader.LoadDataset()
 
 net = Network(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15)
@@ -70,16 +72,25 @@ for i in range(0, number_of_hidden_layers - 1):
 
 net.add_layer(FullyConnectedLayer(20, number_of_output_nodes, activation_function=Sigmoid))
 
-net.train(batch_size=1, MAX_EPOCH=5)
+net.train(batch_size=1, MAX_EPOCH=15)
 
 test_accuracy = net.compute_test_accuracy()
 print(f"Test accuracy: {test_accuracy}")
 
+"""
 print("Secondo me è un", net.get_class(data_loader.train_X[10]))
 image = np.reshape(data_loader.train_X[10], (28,28)) # 28 = sqrt(sample size)
 fig = plt.figure
 plt.imshow(image, cmap='gray')
 plt.show()
+"""
 
+time = range(1, len(net.training_error_history) + 1)
+plt.plot(time, net.training_error_history, marker="o")
+plt.plot(time, net.validation_error_history, marker="o")
 
-
+plt.title("Training and validation error history")
+plt.xlabel("Epoch")
+plt.ylabel("Error")
+plt.legend(["Training error","Validation error"])
+plt.show()
