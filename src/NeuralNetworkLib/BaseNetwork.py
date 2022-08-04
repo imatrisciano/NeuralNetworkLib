@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from cmath import isnan
 from datetime import datetime
 import numpy as np
@@ -8,13 +9,12 @@ from NeuralNetworkLib.StoppingCriteria.IStoppingCriterion import IStoppingCriter
 from NeuralNetworkLib.StoppingCriteria.NeverStopCriterion import NeverStopCriterion
 from NeuralNetworkLib.ErrorFunctions.IErrorFunction import IErrorFunction
 
-class Network:
+class BaseNetwork:
 
-    def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, stop_criterion: IStoppingCriterion = NeverStopCriterion, learning_rate = 0.1) -> None:
+    def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, stop_criterion: IStoppingCriterion = NeverStopCriterion) -> None:
         self.data_loader = data_loader
         self.stop_criterion = stop_criterion
         self.error_function = error_function
-        self.learning_rate = learning_rate
 
         self.train_X = data_loader.train_X
         self.train_Y = data_loader.train_Y
@@ -47,10 +47,6 @@ class Network:
 
         for epoch in range(0, MAX_EPOCH):
             epoch_start_time = datetime.now()
-
-            if self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history):
-                print("Stopping criterion met.")
-                break
 
             np.random.shuffle(indici_training_set)
 
@@ -90,6 +86,10 @@ class Network:
             epoch_duration = datetime.now() - epoch_start_time
 
             print(f"Epoch #{epoch+1}: training error: {training_error}, validation error: {validation_error}. Took {epoch_duration}")
+
+            if self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history):
+                print("Stopping criterion met.")
+                break
             
         train_duration = datetime.now() - train_start_time
         print(f"Training completed in {train_duration}")
@@ -110,12 +110,8 @@ class Network:
         #calculate delta for the output layer
         output_layer = self.Layers[-1]
 
-        #a = output_layer.activation_function.derivative(output_layer.activation)
-        #b = self.error_function.calculate_derivative(expected=t, actual=y) 
         for i in range(output_layer.number_of_nodes):
-            #output_layer.delta[i] = a[i]*b[i]
             output_layer.delta[i] = output_layer.activation_function.derivative(output_layer.activation[i]) * self.error_function.calculate_derivative(t[i], y[i]) 
-        #output_layer.delta += a*b
 
         for i in reversed(range(len(self.Layers) - 1)):
             layer = self.Layers[i]
@@ -141,45 +137,10 @@ class Network:
  
             input = np.append(input.copy(), 1.0)
             layer.dW += layer.delta.reshape(len(layer.delta), 1) @ input.reshape(1, len(input))
-            """
-            for i in range(layer.number_of_nodes):
-                for j in range(layer.input_size):
-                    layer.dW[i][j] += layer.delta[i] * input[j] 
-                    layer.dW[i][-1] += layer.delta[i] # * 1 : bias
-            """
 
+    @abstractmethod
     def update_weights(self):
-        for layer in self.Layers:
-            layer.W -= self.learning_rate * layer.dW
-        """
-        for layer in self.Layers:
-            for i in range(layer.number_of_nodes):
-                for j in range(layer.input_size ):
-                    layer.W[i][j] -= self.learning_rate * 1.0/self.batch_size * layer.dW[i][j]
-        """
-
-
-        return
-        for l in range (0, len(self.Layers)):
-            layer = self.Layers[l]
-            #for j in range(0, len(layer.W)):
-            """
-            for n in range(0, layer.number_of_nodes):
-                delta_neurone = layer.delta[n]
-                input_neurone = layer.input[n] #??
-                #https://brilliant.org/wiki/backpropagation/ 
-                #TODO
-            """
-            for i in range(0, len(layer.W)):
-                for j in range (0, len(layer.W[0])):
-                    dW = layer.delta[i] * layer.total_input[j] / self.batch_size
-                    layer.W[i][j] -= self.learning_rate * dW
-
-            """
-            delta_T = np.reshape(layer.delta, (len(layer.delta), 1))
-            dW = (delta_T @ np.reshape(layer.input, (1, len(layer.input)))) / self.batch_size
-            layer.W -= self.learning_rate * dW
-            """
+        pass
 
 
     def get_class(self, x):
