@@ -11,10 +11,10 @@ class FullyConnectedLayer(BaseLayer):
         input = input.reshape(len(input), 1)
 
 
-
         self.activation = self.W @ input
         self.output = self.activation_function.calculate(self.activation)
         return self.output
+
         """
         self.activation = np.zeros(self.number_of_nodes)
         for i in range(self.number_of_nodes): # does not include the last one, which is bias
@@ -23,7 +23,7 @@ class FullyConnectedLayer(BaseLayer):
             self.activation[i] += self.W[i][-1]
             self.output[i] = self.activation_function.calculate(self.activation[i])
         return self.output
-        """
+        #"""
         
         
 

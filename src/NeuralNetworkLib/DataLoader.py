@@ -3,10 +3,11 @@ import numpy as np
 
 class DataLoader:
 
-    def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75):
+    def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75, test_set_size = 1000):
         self.dataset_path = dataset_path
         self.training_set_percentage = training_set_percentage
         self.dataset_percentage = dataset_percentage
+        self.test_set_size = test_set_size
 
     def LoadDataset(self):
         """ Loads the dataset and splits it into training and validation. Also loads the test set.
@@ -28,8 +29,8 @@ class DataLoader:
         
         test_X, test_Y = mndata.load_testing()
 
-        self.train_X = np.array(train_X) / 255
-        self.labels = np.unique(train_Y)
+        self.train_X = np.array(train_X[0:self.test_set_size]) / 255
+        self.labels = np.unique(train_Y[0:self.test_set_size])
 
         self.train_Y = self.labels_to_one_hot(train_Y)
 

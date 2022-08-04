@@ -1,8 +1,8 @@
 from cmath import isnan
 from datetime import datetime
-import time
 import numpy as np
 from NeuralNetworkLib.DataLoader import DataLoader
+from NeuralNetworkLib.ErrorFunctions.CrossEntropyWithSoftMax import CrossEntropyWithSoftMax
 from NeuralNetworkLib.Layers.BaseLayer import BaseLayer
 from NeuralNetworkLib.StoppingCriteria.IStoppingCriterion import IStoppingCriterion
 from NeuralNetworkLib.StoppingCriteria.NeverStopCriterion import NeverStopCriterion
@@ -28,6 +28,8 @@ class Network:
 
         self.Layers = []
 
+        self.cancel_flag = False
+
 
     def add_layer(self, layer: BaseLayer):
         self.Layers.append(layer)
@@ -35,7 +37,7 @@ class Network:
     def train(self, batch_size, MAX_EPOCH=100):
         """Batch training process"""
         self.batch_size = batch_size
-        
+
         if len(self.train_X) % self.batch_size != 0:
             print("Invalid batch size, should be a divisor of len(self.train_X)")
             return
@@ -43,7 +45,7 @@ class Network:
         train_start_time = datetime.now()
 
         for epoch in range(0, MAX_EPOCH):
-            epoch_start_time = time.time()
+            epoch_start_time = datetime.now()
 
             if self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history):
                 print("Stopping criterion met.")
@@ -64,7 +66,13 @@ class Network:
                     
                 self.update_weights()
 
+                if self.cancel_flag:
+                    break
             
+
+            if self.cancel_flag:
+                print("Training stopped")
+                break
 
             training_error = self.compute_training_error()
             validation_error = self.compute_validation_error()
@@ -76,9 +84,9 @@ class Network:
             self.training_error_history.append(training_error)
             self.validation_error_history.append(validation_error)
 
-            epoch_duration = time.time() - epoch_start_time
+            epoch_duration = datetime.now() - epoch_start_time
 
-            print(f"Epoch #{epoch}: training error: {training_error}, validation error: {validation_error}. Took {1000.0 * epoch_duration} ms")
+            print(f"Epoch #{epoch+1}: training error: {training_error}, validation error: {validation_error}. Took {epoch_duration}")
             
         train_duration = datetime.now() - train_start_time
         print(f"Training completed in {train_duration}")
@@ -106,23 +114,6 @@ class Network:
             output_layer.delta[i] = output_layer.activation_function.derivative(output_layer.activation[i]) * self.error_function.calculate_derivative(t[i], y[i]) 
         #output_layer.delta += a*b
 
-        """
-        for i in range(len(self.Layers) - 2, 0, -1):
-            layer = self.Layers[i]
-            next_layer = self.Layers[i+1]
-            ##layer.delta += layer.activation_function.derivative(layer.unactivated_output) * np.dot(next_layer.delta.reshape(1,-1), next_layer.W)
-            #layer.delta = layer.activation_function.derivative(layer.output) * (next_layer.W * next_layer.delta)
-           
-            
-            g_prime_in_a = layer.activation_function.derivative(layer.unactivated_output)
-            for h in range (0, layer.number_of_nodes):
-                sum = 0.0
-                for k in range(0, next_layer.number_of_nodes):
-                    w = next_layer.W[k, h]
-                    delta_k = next_layer.delta[k]
-                    sum += w*delta_k
-                layer.delta[h] += g_prime_in_a[h] * sum 
-        """
         for i in reversed(range(len(self.Layers) - 1)):
             layer = self.Layers[i]
             next_layer = self.Layers[i+1]
@@ -132,10 +123,10 @@ class Network:
                 error = 0.0
                 for k in range(next_layer.number_of_nodes): # for each neuron in the next layer
                     error += next_layer.W[k][j] * next_layer.delta[k]
+
+                #error = np.sum(np.dot(next_layer.W[:,j], next_layer.delta))
                 layer.delta[j] = error * layer.activation_function.derivative(layer.activation[j])
 
-            #layer.delta += layer.activation_function.derivative(layer.W @ prev_layer.output) * np.dot(next_layer.delta, next_layer.W)
-        
     def update_derivative(self, x):
         for l in range(len(self.Layers)):
             if l == 0:
@@ -145,10 +136,14 @@ class Network:
             
             layer = self.Layers[l]
  
+            input = np.append(input.copy(), 1.0)
+            layer.dW += layer.delta.reshape(len(layer.delta), 1) @ input.reshape(1, len(input))
+            """
             for i in range(layer.number_of_nodes):
                 for j in range(layer.input_size):
                     layer.dW[i][j] += layer.delta[i] * input[j] 
                     layer.dW[i][-1] += layer.delta[i] # * 1 : bias
+            """
 
     def update_weights(self):
         for layer in self.Layers:

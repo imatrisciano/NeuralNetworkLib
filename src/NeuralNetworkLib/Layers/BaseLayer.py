@@ -12,7 +12,7 @@ class BaseLayer:
         self.__initialize_weight()
     
 
-    def __initialize_weight(self, random_min=-1, random_max=1) -> None:
+    def __initialize_weight(self, random_min=-0.1, random_max=0.1) -> None:
         W_size = (self.number_of_nodes, self.input_size + 1)
         self.W = np.random.uniform(random_min, random_max, W_size)
         self.dW = np.zeros_like(self.W)
