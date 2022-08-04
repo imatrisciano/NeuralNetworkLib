@@ -72,7 +72,7 @@ for i in range(0, number_of_hidden_layers - 1):
 
 net.add_layer(FullyConnectedLayer(20, number_of_output_nodes, activation_function=Sigmoid))
 
-net.train(batch_size=1, MAX_EPOCH=15)
+net.train(batch_size=50, MAX_EPOCH=10)
 
 test_accuracy = net.compute_test_accuracy()
 print(f"Test accuracy: {test_accuracy}")

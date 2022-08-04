@@ -43,6 +43,7 @@ class Network:
             return
 
         train_start_time = datetime.now()
+        indici_training_set = np.arange(len(self.train_X))
 
         for epoch in range(0, MAX_EPOCH):
             epoch_start_time = datetime.now()
@@ -51,15 +52,17 @@ class Network:
                 print("Stopping criterion met.")
                 break
 
+            np.random.shuffle(indici_training_set)
+
             n = 0
             while n < len(self.train_X):
                 self.reset_error_derivative()
                 for b in range(0, self.batch_size):
                     
-                    x = self.train_X[n]
+                    x = self.train_X[indici_training_set[n]]
                     y = self.forward(x)
                     
-                    t = self.train_Y[n]
+                    t = self.train_Y[indici_training_set[n]]
                     self.backward(y, t)
                     self.update_derivative(x)
                     n += 1
@@ -147,7 +150,7 @@ class Network:
 
     def update_weights(self):
         for layer in self.Layers:
-            layer.W -= self.learning_rate /self.batch_size * layer.dW
+            layer.W -= self.learning_rate * layer.dW
         """
         for layer in self.Layers:
             for i in range(layer.number_of_nodes):
