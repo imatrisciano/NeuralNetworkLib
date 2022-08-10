@@ -87,7 +87,7 @@ class BaseNetwork:
 
             print(f"Epoch #{epoch+1}: training error: {training_error}, validation error: {validation_error}. Took {epoch_duration}")
 
-            if self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history):
+            if epoch > 0 and self.stop_criterion.should_stop(self.training_error_history, self.validation_error_history): #only check the stopping criterion after the first epoch
                 print("Stopping criterion met.")
                 break
             
