@@ -43,47 +43,55 @@ eta_pos=1.2, eta_neg=0.5, input->20->output, batch 200, training 1, 3 epoch  : t
 eta_pos=1.2, eta_neg=0.5, input->20->output, batch 200, training 1, 5 epoch  : test 0.8708
 """
 
+random.seed(1) #setting a deterministic seed to have more consistent results
 
 
+
+#Loading the dataset
 dataset_path = os.path.normpath(os.path.join(os.getcwd(), "../dataset/mnist/"))
 data_loader = DataLoader(dataset_path, dataset_percentage=0.1, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
 data_loader.LoadDataset()
 
 
+#setting up network parameters
+
 #stop_criterion = GeneralizationLoss(alpha=0.1)
-stop_criterion = ProgressQuotient(alpha=0.02, strip_length=5)
+stop_criterion = ProgressQuotient(alpha=0.1, strip_length=5)
 
-
-#https://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=FB6D482F7A3F9863F0003732B12BD8D9?doi=10.1.1.21.3428&rep=rep1&type=pdf
 net = SimpleNetwork(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15, stop_criterion=stop_criterion)
 #net = NetworkWithRPROP(data_loader, CrossEntropyWithSoftMax, eta_pos=1.2, eta_neg=0.5, stop_criterion=stop_criterion)
 
-
-def ctrl_c_handler(signum, frame):
-    net.cancel_flag = True
-
-signal.signal(signal.SIGINT, ctrl_c_handler)
-
-random.seed(3)
-
-number_of_hidden_layers = 3
-number_of_nodes = 6
+number_of_nodes = 20
 number_of_output_nodes = 10
 input_size = len(data_loader.train_X[0])
 
-net.add_layer(FullyConnectedLayer(input_size, 20, activation_function=Sigmoid))
-net.add_layer(FullyConnectedLayer(net.Layers[-1].number_of_nodes, number_of_output_nodes, activation_function=Sigmoid))
+net.add_layer(FullyConnectedLayer(input_size, number_of_nodes, activation_function=Sigmoid)) #hidden layer
+net.add_layer(FullyConnectedLayer(net.Layers[-1].number_of_nodes, number_of_output_nodes, activation_function=Sigmoid)) #output layer
 
-net.train(batch_size=100, MAX_EPOCH=5)
 
+
+
+#HANDLE SIGINT
+def ctrl_c_handler(signum, frame):
+    """Hanldes SIGINT (CTRL+C). If detected the training process is interrupted"""
+    net.cancel_flag = True
+signal.signal(signal.SIGINT, ctrl_c_handler)
+
+
+#Start the training process
+net.train(batch_size=10, MAX_EPOCH=100)
+
+
+#compute and print test accuracy
 test_accuracy = net.compute_test_accuracy()
 print(f"Test accuracy: {test_accuracy}")
 
 
 
-time = range(1, len(net.training_error_history) + 1)
-plt.plot(time, net.training_error_history, marker="o")
-plt.plot(time, net.validation_error_history, marker="o")
+#Plot training and validation error
+time_axis = range(1, len(net.training_error_history) + 1)
+plt.plot(time_axis, net.training_error_history, marker="o")
+plt.plot(time_axis, net.validation_error_history, marker="o")
 
 plt.title("Training and validation error history")
 plt.xlabel("Epoch")
@@ -94,18 +102,24 @@ plt.show()
 
 
 def show_item(item_index : int):
-    net_output = net.forward(data_loader.train_X[item_index])
-    item_class = np.argmax(net_output)
-    item_class_score = net_output[item_class].item()
-    item_true_class = np.argmax(data_loader.train_Y[item_index])
+    item = data_loader.test_X[item_index]
+    net_output = net.forward(item)
+
+    item_class_index = np.argmax(net_output)
+    item_label = data_loader.labels[item_class_index]
+    item_class_score = net_output[item_class_index].item()
+
+    item_true_class_index = np.argmax(data_loader.test_Y[item_index])
+    item_true_label = data_loader.labels[item_true_class_index]
 
 
-    image = np.reshape(data_loader.train_X[item_index], (28,28)) # 28 = sqrt(sample size)
+    image = np.reshape(item, (28,28)) # 28 = sqrt(sample size)
     plt.figure
     plt.imshow(image, cmap='gray')
-    plt.title(f"Per la rete è un {item_class}, ne è sicura al {int(item_class_score * 100)}%\nUfficialmente è un {item_true_class}")
+    plt.title(f"Per la rete è un {item_label}, ne è sicura al {int(item_class_score * 100)}%\nUfficialmente è un {item_true_label}")
     plt.show()
 
 
-for i in range(10):
+#display some items in the dataset
+for i in range(3):
     show_item(i)

@@ -3,7 +3,7 @@ import numpy as np
 
 class DataLoader:
 
-    def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75, test_set_size = 1000):
+    def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75, test_set_size = -1):
         self.dataset_path = dataset_path
         self.training_set_percentage = training_set_percentage
         self.dataset_percentage = dataset_percentage
@@ -18,6 +18,8 @@ class DataLoader:
         mndata = MNIST(self.dataset_path)
         set_X, set_Y = mndata.load_training()
 
+
+        #split the dataset into training and validation sets
         training_set_size = int (len(set_X) * self.training_set_percentage * self.dataset_percentage)
         validation_set_size = int (len(set_X)*self.dataset_percentage - training_set_size)
 
@@ -27,19 +29,32 @@ class DataLoader:
         validation_X = set_X[training_set_size: training_set_size + validation_set_size]
         validation_Y = set_Y[training_set_size: training_set_size + validation_set_size]
         
-        test_X, test_Y = mndata.load_testing()
 
-        self.train_X = np.array(train_X[0:self.test_set_size]) / 255
-        self.labels = np.unique(train_Y[0:self.test_set_size])
+        #load the test set
+        test_X, test_Y = mndata.load_testing()
+        self.labels = np.unique(train_Y)
+
+
+        #preparing training set data
+        self.train_X = np.array(train_X) / 255.0
 
         self.train_Y = self.labels_to_one_hot(train_Y)
 
         print(f"Training set loaded: {len(self.train_X)} elements")
 
+
+        # preparing validation set data
         self.validation_X = np.array(validation_X) / 255
         self.validation_Y = self.labels_to_one_hot(validation_Y)
 
         print(f"Validation set loaded: {len(self.validation_X)} elements")
+
+
+        # preparing test set data
+        if self.test_set_size != -1 and self.test_set_size <= len(test_X):
+            # if requested reduce test set size for performance reasons
+            test_X = test_X[0:self.test_set_size]
+            test_Y = test_Y[0:self.test_set_size]
 
         self.test_X = np.array(test_X) / 255
         self.test_Y = self.labels_to_one_hot(test_Y)
