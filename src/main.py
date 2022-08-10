@@ -74,18 +74,12 @@ input_size = len(data_loader.train_X[0])
 net.add_layer(FullyConnectedLayer(input_size, 20, activation_function=Sigmoid))
 net.add_layer(FullyConnectedLayer(net.Layers[-1].number_of_nodes, number_of_output_nodes, activation_function=Sigmoid))
 
-net.train(batch_size=100, MAX_EPOCH=100)
+net.train(batch_size=100, MAX_EPOCH=5)
 
 test_accuracy = net.compute_test_accuracy()
 print(f"Test accuracy: {test_accuracy}")
 
-"""
-print("Secondo me è un", net.get_class(data_loader.train_X[10]))
-image = np.reshape(data_loader.train_X[10], (28,28)) # 28 = sqrt(sample size)
-fig = plt.figure
-plt.imshow(image, cmap='gray')
-plt.show()
-"""
+
 
 time = range(1, len(net.training_error_history) + 1)
 plt.plot(time, net.training_error_history, marker="o")
@@ -96,3 +90,22 @@ plt.xlabel("Epoch")
 plt.ylabel("Error")
 plt.legend(["Training error","Validation error"])
 plt.show()
+
+
+
+def show_item(item_index : int):
+    net_output = net.forward(data_loader.train_X[item_index])
+    item_class = np.argmax(net_output)
+    item_class_score = net_output[item_class].item()
+    item_true_class = np.argmax(data_loader.train_Y[item_index])
+
+
+    image = np.reshape(data_loader.train_X[item_index], (28,28)) # 28 = sqrt(sample size)
+    plt.figure
+    plt.imshow(image, cmap='gray')
+    plt.title(f"Per la rete è un {item_class}, ne è sicura al {int(item_class_score * 100)}%\nUfficialmente è un {item_true_class}")
+    plt.show()
+
+
+for i in range(10):
+    show_item(i)
