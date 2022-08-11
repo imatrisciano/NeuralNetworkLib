@@ -116,15 +116,17 @@ class BaseNetwork:
         for i in reversed(range(len(self.Layers) - 1)):
             layer = self.Layers[i]
             next_layer = self.Layers[i+1]
-            #g_prime_in_a = layer.activation_function.derivative(layer.activation)
+            g_prime_in_a = layer.activation_function.derivative(layer.activation)
             
             for j in range(layer.number_of_nodes): # for each neuron in the given (non-output) layer
+                error = np.dot(next_layer.W[:, j], next_layer.delta) #this line implements the following (commented) code:
+                """
                 error = 0.0
                 for k in range(next_layer.number_of_nodes): # for each neuron in the next layer
                     error += next_layer.W[k][j] * next_layer.delta[k]
+                """
 
-                #error = np.sum(np.dot(next_layer.W[:,j], next_layer.delta))
-                layer.delta[j] = error * layer.activation_function.derivative(layer.activation[j])
+                layer.delta[j] = error * g_prime_in_a[j] #layer.activation_function.derivative(layer.activation[j])
 
     def update_derivative(self, x):
         for l in range(len(self.Layers)):

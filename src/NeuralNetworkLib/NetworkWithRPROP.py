@@ -42,7 +42,7 @@ class NetworkWithRPROP(BaseNetwork):
 
 
 
-            """   
+"""   
 
 
             
@@ -51,8 +51,9 @@ class NetworkWithRPROP(BaseNetwork):
 
             layer.W -= np.multiply(layer.rprop_deltas, layer.dW)
             layer.dW_old = layer.dW.copy()
-            """
+            
             
     
     def get_etas(self, dW_change):
         return self.eta_pos * np.heaviside(dW_change, 0) + self.eta_neg * (np.ones_like(dW_change) - np.heaviside(dW_change, 1))
+"""
