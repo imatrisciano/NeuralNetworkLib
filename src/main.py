@@ -4,7 +4,6 @@ import signal
 from NeuralNetworkLib.ActivationFunctions.LeakyReLU import LeakyReLU
 
 from NeuralNetworkLib.ErrorFunctions.CrossEntropyWithSoftMax import CrossEntropyWithSoftMax
-from NeuralNetworkLib.Layers.IdentityLayer import IdentityLayer
 from NeuralNetworkLib.SimpleNetwork import SimpleNetwork
 from NeuralNetworkLib.NetworkWithRPROP import NetworkWithRPROP
 from NeuralNetworkLib.ActivationFunctions.ReLU import ReLU
@@ -49,7 +48,7 @@ random.seed(1) #setting a deterministic seed to have more consistent results
 
 #Loading the dataset
 dataset_path = os.path.normpath(os.path.join(os.getcwd(), "../dataset/mnist/"))
-data_loader = DataLoader(dataset_path, dataset_percentage=0.1, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
+data_loader = DataLoader(dataset_path, dataset_percentage=0.3, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
 data_loader.LoadDataset()
 
 
@@ -79,7 +78,7 @@ signal.signal(signal.SIGINT, ctrl_c_handler)
 
 
 #Start the training process
-net.train(batch_size=10, MAX_EPOCH=100)
+net.train(batch_size=100, MAX_EPOCH=15)
 
 
 #compute and print test accuracy

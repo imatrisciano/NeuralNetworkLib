@@ -1,3 +1,4 @@
+import numpy as np
 from NeuralNetworkLib.BaseNetwork import BaseNetwork
 from NeuralNetworkLib.DataLoader import DataLoader
 from NeuralNetworkLib.ErrorFunctions.IErrorFunction import IErrorFunction
@@ -10,6 +11,12 @@ class SimpleNetwork(BaseNetwork):
         super().__init__(data_loader, error_function, stop_criterion)
         self.learning_rate = learning_rate
     
+    def init_train(self):
+        super().init_train()
+    
+    def reset_error_derivative(self):
+        super().reset_error_derivative()
+
     def update_weights(self):
         for layer in self.Layers:
             layer.W -= self.learning_rate * layer.dW

@@ -22,7 +22,7 @@ class ProgressQuotient(IStoppingCriterion):
     def training_progress(strip_length, training_error_history):
         """how much was the average training error during the strip larger than the minimum training error during the strip?"""
 
-        strip_start = max(len(training_error_history) - strip_length, 0) # if there are too few epochs, the strip_length is the biggest possible
+        strip_start = max(len(training_error_history) - strip_length, 0) # if there are not enough epochs, the strip_length is the biggest possible
         strip_end = len(training_error_history)
 
         strip = training_error_history[strip_start:strip_end]
