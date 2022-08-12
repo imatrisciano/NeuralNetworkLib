@@ -57,8 +57,8 @@ data_loader.LoadDataset()
 #stop_criterion = GeneralizationLoss(alpha=0.1)
 stop_criterion = ProgressQuotient(alpha=0.1, strip_length=5)
 
-net = SimpleNetwork(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15, stop_criterion=stop_criterion)
-#net = NetworkWithRPROP(data_loader, CrossEntropyWithSoftMax, eta_pos=1.2, eta_neg=0.5, stop_criterion=stop_criterion)
+#net = SimpleNetwork(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15, stop_criterion=stop_criterion)
+net = NetworkWithRPROP(data_loader, CrossEntropyWithSoftMax, eta_pos=1.2, eta_neg=0.5, stop_criterion=stop_criterion)
 
 number_of_nodes = 20
 number_of_output_nodes = 10

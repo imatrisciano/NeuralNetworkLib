@@ -17,7 +17,7 @@ class NetworkWithRPROP(BaseNetwork):
         self.eta_neg = eta_neg
         self.eta_max = 50.0
         self.eta_min = 1e-6
-        self.delta_initial_value = 0.1 #we initialize rprop_deltas to a small value
+        self.delta_initial_value = 0.01 #we initialize rprop_deltas to a small value
     
     def init_train(self):
         super().init_train()
