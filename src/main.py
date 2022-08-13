@@ -48,7 +48,7 @@ random.seed(1) #setting a deterministic seed to have more consistent results
 
 #Loading the dataset
 dataset_path = os.path.normpath(os.path.join(os.getcwd(), "../dataset/mnist/"))
-data_loader = DataLoader(dataset_path, dataset_percentage=0.3, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
+data_loader = DataLoader(dataset_path, dataset_percentage=0.1, training_set_percentage=0.75, test_set_size=10000) #loads mnist, splitting it into 75% training and 25% validation
 data_loader.LoadDataset()
 
 
@@ -57,8 +57,8 @@ data_loader.LoadDataset()
 #stop_criterion = GeneralizationLoss(alpha=0.1)
 stop_criterion = ProgressQuotient(alpha=0.1, strip_length=5)
 
-#net = SimpleNetwork(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15, stop_criterion=stop_criterion)
-net = NetworkWithRPROP(data_loader, CrossEntropyWithSoftMax, eta_pos=1.2, eta_neg=0.5, stop_criterion=stop_criterion)
+net = SimpleNetwork(data_loader, CrossEntropyWithSoftMax, learning_rate=0.15, stop_criterion=stop_criterion)
+#net = NetworkWithRPROP(data_loader, CrossEntropyWithSoftMax, eta_pos=1.2, eta_neg=0.5, stop_criterion=stop_criterion)
 
 number_of_nodes = 20
 number_of_output_nodes = 10
@@ -78,7 +78,7 @@ signal.signal(signal.SIGINT, ctrl_c_handler)
 
 
 #Start the training process
-net.train(batch_size=100, MAX_EPOCH=15)
+net.train(batch_size=10, MAX_EPOCH=15)
 
 
 #compute and print test accuracy

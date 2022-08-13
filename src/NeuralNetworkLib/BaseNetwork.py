@@ -82,7 +82,7 @@ class BaseNetwork:
                 print("Training stopped")
                 break
             
-            #we now comput training and validation errors and we store for later use
+            #we now compute training and validation errors and we store them for later use
             training_error = self.compute_training_error()
             validation_error = self.compute_validation_error()
 
@@ -120,12 +120,14 @@ class BaseNetwork:
             layer.delta.fill(0.0)
 
     def backward(self, y, t):
-        """Backward propagation for the """
+        """Backward propagation for a given item"""
 
         #calculate delta for the output layer
         output_layer = self.Layers[-1]
-        for i in range(output_layer.number_of_nodes):
-            output_layer.delta[i] = output_layer.activation_function.derivative(output_layer.activation[i]) * self.error_function.calculate_derivative(t[i], y[i]) 
+        output_layer.delta = np.multiply(output_layer.activation_function.derivative(output_layer.activation), self.error_function.calculate_derivative(t, y))
+        
+        #for i in range(output_layer.number_of_nodes):
+        #    output_layer.delta[i] = output_layer.activation_function.derivative(output_layer.activation[i]) * self.error_function.calculate_derivative(t[i], y[i]) 
 
         #calculate the delta for every non-output layer, starting from the last hidden layer all the way to the first layer
         for i in reversed(range(len(self.Layers) - 1)):
@@ -152,7 +154,7 @@ class BaseNetwork:
             
             layer = self.Layers[l]
  
-            input = np.append(input.copy(), 1.0)
+            input = np.append(input.copy(), 1.0) #include bias
             layer.dW += layer.delta.reshape(len(layer.delta), 1) @ input.reshape(1, len(input))
 
     @abstractmethod
