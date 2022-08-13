@@ -4,6 +4,9 @@ import numpy as np
 class DataLoader:
 
     def __init__(self, dataset_path, dataset_percentage = 0.3, training_set_percentage = 0.75, test_set_size = -1):
+        assert (dataset_percentage > 0 and dataset_percentage <= 1), "dataset_percentage can only be in range (0,1]"
+        assert (training_set_percentage > 0 and training_set_percentage <= 1), "training_set_percentage can only be in range (0,1]"
+        
         self.dataset_path = dataset_path
         self.training_set_percentage = training_set_percentage
         self.dataset_percentage = dataset_percentage
