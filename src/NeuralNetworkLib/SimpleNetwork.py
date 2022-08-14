@@ -10,12 +10,6 @@ class SimpleNetwork(BaseNetwork):
     def __init__(self, data_loader: DataLoader, error_function: IErrorFunction, stop_criterion: IStoppingCriterion = NeverStopCriterion, learning_rate = 0.1) -> None:
         super().__init__(data_loader, error_function, stop_criterion)
         self.learning_rate = learning_rate
-    
-    def init_train(self):
-        super().init_train()
-    
-    def reset_error_derivative(self):
-        super().reset_error_derivative()
 
     def update_weights(self):
         for layer in self.Layers:
